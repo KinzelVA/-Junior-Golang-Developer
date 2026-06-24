@@ -31,5 +31,27 @@
         "up"
       ]
 
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: subscriptions-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      APP_PORT: 8080
+      APP_ENV: production
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: subscriptions
+      DB_SSL_MODE: disable
+    ports:
+      - "8080:8080"
+
 volumes:
   postgres_data:
