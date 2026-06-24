@@ -131,6 +131,58 @@ LIMIT $3 OFFSET $4
 	return subscriptions, nil
 }
 
+func (r *SubscriptionRepository) Update(ctx context.Context, subscription *model.Subscription) error {
+	query := `
+UPDATE subscriptions
+SET
+service_name = $2,
+price = $3,
+user_id = $4,
+start_date = $5,
+end_date = $6,
+updated_at = NOW()
+WHERE id = $1
+RETURNING created_at, updated_at
+`
+
+	err := r.pool.QueryRow(
+		ctx,
+		query,
+		subscription.ID,
+		subscription.ServiceName,
+		subscription.Price,
+		subscription.UserID,
+		subscription.StartDate,
+		subscription.EndDate,
+	).Scan(
+		&subscription.CreatedAt,
+		&subscription.UpdatedAt,
+	)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrSubscriptionNotFound
+		}
+
+		return err
+	}
+
+	return nil
+}
+
+func (r *SubscriptionRepository) Delete(ctx context.Context, id string) error {
+	commandTag, err := r.pool.Exec(ctx, `DELETE FROM subscriptions WHERE id = $1`, id)
+	if err != nil {
+		return err
+	}
+
+	if commandTag.RowsAffected() == 0 {
+		return ErrSubscriptionNotFound
+	}
+
+	return nil
+}
+
 type subscriptionScanner interface {
 	Scan(dest ...any) error
 }
