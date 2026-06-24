@@ -183,6 +183,68 @@ func (r *SubscriptionRepository) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
+func (r *SubscriptionRepository) TotalCost(ctx context.Context, filter model.TotalCostFilter) (int, error) {
+	query := `
+WITH active_subscriptions AS (
+SELECT
+price,
+GREATEST(start_date, $1::date) AS active_start,
+LEAST(COALESCE(end_date, $2::date), $2::date) AS active_end
+FROM subscriptions
+WHERE
+start_date <= $2::date
+AND COALESCE(end_date, $2::date) >= $1::date
+AND ($3::uuid IS NULL OR user_id = $3::uuid)
+AND ($4::text IS NULL OR service_name = $4::text)
+)
+SELECT COALESCE(
+SUM(
+price * (
+(
+EXTRACT(YEAR FROM active_end)::int
+-
+EXTRACT(YEAR FROM active_start)::int
+) * 12
++
+(
+EXTRACT(MONTH FROM active_end)::int
+-
+EXTRACT(MONTH FROM active_start)::int
+)
++ 1
+)
+),
+0
+) AS total
+FROM active_subscriptions
+`
+
+	var userID any
+	if filter.UserID != nil && *filter.UserID != "" {
+		userID = *filter.UserID
+	}
+
+	var serviceName any
+	if filter.ServiceName != nil && *filter.ServiceName != "" {
+		serviceName = *filter.ServiceName
+	}
+
+	var total int
+
+	if err := r.pool.QueryRow(
+		ctx,
+		query,
+		filter.PeriodStart,
+		filter.PeriodEnd,
+		userID,
+		serviceName,
+	).Scan(&total); err != nil {
+		return 0, err
+	}
+
+	return total, nil
+}
+
 type subscriptionScanner interface {
 	Scan(dest ...any) error
 }

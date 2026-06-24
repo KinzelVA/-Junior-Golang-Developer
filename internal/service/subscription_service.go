@@ -148,6 +148,45 @@ func (s *SubscriptionService) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
+func (s *SubscriptionService) TotalCost(ctx context.Context, request model.TotalCostRequest) (int, error) {
+	if request.PeriodStart == "" {
+		return 0, fmt.Errorf("period_start is required")
+	}
+
+	if request.PeriodEnd == "" {
+		return 0, fmt.Errorf("period_end is required")
+	}
+
+	periodStart, err := model.ParseMonthYear(request.PeriodStart)
+	if err != nil {
+		return 0, fmt.Errorf("invalid period_start: %w", err)
+	}
+
+	periodEnd, err := model.ParseMonthYear(request.PeriodEnd)
+	if err != nil {
+		return 0, fmt.Errorf("invalid period_end: %w", err)
+	}
+
+	if periodEnd.Before(periodStart) {
+		return 0, fmt.Errorf("period_end must be greater than or equal to period_start")
+	}
+
+	if request.UserID != nil && *request.UserID != "" {
+		if _, err := uuid.Parse(*request.UserID); err != nil {
+			return 0, fmt.Errorf("user_id must be valid UUID")
+		}
+	}
+
+	filter := model.TotalCostFilter{
+		PeriodStart: periodStart,
+		PeriodEnd:   periodEnd,
+		UserID:      request.UserID,
+		ServiceName: request.ServiceName,
+	}
+
+	return s.repository.TotalCost(ctx, filter)
+}
+
 func parseOptionalEndDate(rawEndDate *string, startDate time.Time) (*time.Time, error) {
 	if rawEndDate == nil || *rawEndDate == "" {
 		return nil, nil

@@ -39,6 +39,24 @@ type ListSubscriptionsRequest struct {
 	Offset      int
 }
 
+type TotalCostRequest struct {
+	PeriodStart string
+	PeriodEnd   string
+	UserID      *string
+	ServiceName *string
+}
+
+type TotalCostFilter struct {
+	PeriodStart time.Time
+	PeriodEnd   time.Time
+	UserID      *string
+	ServiceName *string
+}
+
+type TotalCostResponse struct {
+	Total int `json:"total"`
+}
+
 type SubscriptionResponse struct {
 	ID          string  `json:"id"`
 	ServiceName string  `json:"service_name"`

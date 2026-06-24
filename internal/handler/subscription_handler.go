@@ -27,6 +27,7 @@ func NewSubscriptionHandler(service *service.SubscriptionService, log *slog.Logg
 func (h *SubscriptionHandler) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/subscriptions", h.Create)
 	router.GET("/subscriptions", h.List)
+	router.GET("/subscriptions-total", h.TotalCost)
 	router.GET("/subscriptions/:id", h.GetByID)
 	router.PUT("/subscriptions/:id", h.Update)
 	router.DELETE("/subscriptions/:id", h.Delete)
@@ -192,6 +193,29 @@ func (h *SubscriptionHandler) Delete(c *gin.Context) {
 	h.log.Info("subscription deleted", slog.String("subscription_id", id))
 
 	c.Status(http.StatusNoContent)
+}
+
+func (h *SubscriptionHandler) TotalCost(c *gin.Context) {
+	request := model.TotalCostRequest{
+		PeriodStart: c.Query("period_start"),
+		PeriodEnd:   c.Query("period_end"),
+		UserID:      stringPointerFromQuery(c, "user_id"),
+		ServiceName: stringPointerFromQuery(c, "service_name"),
+	}
+
+	total, err := h.service.TotalCost(c.Request.Context(), request)
+	if err != nil {
+		h.log.Warn("failed to calculate total subscription cost", slog.String("error", err.Error()))
+
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, model.TotalCostResponse{
+		Total: total,
+	})
 }
 
 func parseIntQuery(c *gin.Context, key string, defaultValue int) (int, error) {
