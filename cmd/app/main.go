@@ -14,7 +14,10 @@ import (
 
 "github.com/KinzelVA/-Junior-Golang-Developer/internal/config"
 "github.com/KinzelVA/-Junior-Golang-Developer/internal/db"
+"github.com/KinzelVA/-Junior-Golang-Developer/internal/handler"
 appLogger "github.com/KinzelVA/-Junior-Golang-Developer/internal/logger"
+"github.com/KinzelVA/-Junior-Golang-Developer/internal/repository"
+"github.com/KinzelVA/-Junior-Golang-Developer/internal/service"
 )
 
 func main() {
@@ -44,6 +47,10 @@ defer postgresPool.Close()
 
 log.Info("connected to PostgreSQL")
 
+subscriptionRepository := repository.NewSubscriptionRepository(postgresPool)
+subscriptionService := service.NewSubscriptionService(subscriptionRepository)
+subscriptionHandler := handler.NewSubscriptionHandler(subscriptionService, log)
+
 router := gin.New()
 router.Use(gin.Recovery())
 router.Use(requestLogger(log))
@@ -69,6 +76,9 @@ c.JSON(http.StatusOK, gin.H{
 "database": "ok",
 })
 })
+
+api := router.Group("/api/v1")
+subscriptionHandler.RegisterRoutes(api)
 
 server := &http.Server{
 Addr:         ":" + cfg.AppPort,
