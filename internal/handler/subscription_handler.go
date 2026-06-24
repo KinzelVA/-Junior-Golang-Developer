@@ -33,6 +33,16 @@ func (h *SubscriptionHandler) RegisterRoutes(router *gin.RouterGroup) {
 	router.DELETE("/subscriptions/:id", h.Delete)
 }
 
+// Create godoc
+// @Summary Create subscription
+// @Description Create a new user subscription
+// @Tags subscriptions
+// @Accept json
+// @Produce json
+// @Param request body model.CreateSubscriptionRequest true "Subscription data"
+// @Success 201 {object} model.SubscriptionResponse
+// @Failure 400 {object} model.ErrorResponse
+// @Router /subscriptions [post]
 func (h *SubscriptionHandler) Create(c *gin.Context) {
 	var request model.CreateSubscriptionRequest
 
@@ -65,6 +75,16 @@ func (h *SubscriptionHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, model.NewSubscriptionResponse(subscription))
 }
 
+// GetByID godoc
+// @Summary Get subscription by ID
+// @Description Get a single subscription by UUID
+// @Tags subscriptions
+// @Produce json
+// @Param id path string true "Subscription UUID"
+// @Success 200 {object} model.SubscriptionResponse
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 404 {object} model.ErrorResponse
+// @Router /subscriptions/{id} [get]
 func (h *SubscriptionHandler) GetByID(c *gin.Context) {
 	id := c.Param("id")
 
@@ -88,6 +108,18 @@ func (h *SubscriptionHandler) GetByID(c *gin.Context) {
 	c.JSON(http.StatusOK, model.NewSubscriptionResponse(subscription))
 }
 
+// List godoc
+// @Summary List subscriptions
+// @Description Get subscriptions with optional filters and pagination
+// @Tags subscriptions
+// @Produce json
+// @Param user_id query string false "User UUID"
+// @Param service_name query string false "Service name"
+// @Param limit query int false "Limit" default(20)
+// @Param offset query int false "Offset" default(0)
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} model.ErrorResponse
+// @Router /subscriptions [get]
 func (h *SubscriptionHandler) List(c *gin.Context) {
 	limit, err := parseIntQuery(c, "limit", 20)
 	if err != nil {
@@ -130,6 +162,18 @@ func (h *SubscriptionHandler) List(c *gin.Context) {
 	})
 }
 
+// Update godoc
+// @Summary Update subscription
+// @Description Update an existing subscription by UUID
+// @Tags subscriptions
+// @Accept json
+// @Produce json
+// @Param id path string true "Subscription UUID"
+// @Param request body model.UpdateSubscriptionRequest true "Subscription data"
+// @Success 200 {object} model.SubscriptionResponse
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 404 {object} model.ErrorResponse
+// @Router /subscriptions/{id} [put]
 func (h *SubscriptionHandler) Update(c *gin.Context) {
 	id := c.Param("id")
 
@@ -171,6 +215,15 @@ func (h *SubscriptionHandler) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, model.NewSubscriptionResponse(subscription))
 }
 
+// Delete godoc
+// @Summary Delete subscription
+// @Description Delete subscription by UUID
+// @Tags subscriptions
+// @Param id path string true "Subscription UUID"
+// @Success 204
+// @Failure 400 {object} model.ErrorResponse
+// @Failure 404 {object} model.ErrorResponse
+// @Router /subscriptions/{id} [delete]
 func (h *SubscriptionHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
 
@@ -195,6 +248,18 @@ func (h *SubscriptionHandler) Delete(c *gin.Context) {
 	c.Status(http.StatusNoContent)
 }
 
+// TotalCost godoc
+// @Summary Calculate total subscription cost
+// @Description Calculate total monthly subscription cost for selected period with optional filters
+// @Tags subscriptions
+// @Produce json
+// @Param period_start query string true "Period start in MM-YYYY format"
+// @Param period_end query string true "Period end in MM-YYYY format"
+// @Param user_id query string false "User UUID"
+// @Param service_name query string false "Service name"
+// @Success 200 {object} model.TotalCostResponse
+// @Failure 400 {object} model.ErrorResponse
+// @Router /subscriptions-total [get]
 func (h *SubscriptionHandler) TotalCost(c *gin.Context) {
 	request := model.TotalCostRequest{
 		PeriodStart: c.Query("period_start"),

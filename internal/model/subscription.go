@@ -110,3 +110,7 @@ func NewSubscriptionResponses(subscriptions []Subscription) []SubscriptionRespon
 
 	return responses
 }
+
+type ErrorResponse struct {
+	Error string `json:"error"`
+}

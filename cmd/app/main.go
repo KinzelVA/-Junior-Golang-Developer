@@ -11,7 +11,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
+	_ "github.com/KinzelVA/-Junior-Golang-Developer/docs"
 	"github.com/KinzelVA/-Junior-Golang-Developer/internal/config"
 	"github.com/KinzelVA/-Junior-Golang-Developer/internal/db"
 	"github.com/KinzelVA/-Junior-Golang-Developer/internal/handler"
@@ -20,6 +23,11 @@ import (
 	"github.com/KinzelVA/-Junior-Golang-Developer/internal/service"
 )
 
+// @title Subscription Aggregation API
+// @version 1.0
+// @description REST service for managing user subscriptions and calculating total subscription costs.
+// @host localhost:8080
+// @BasePath /api/v1
 func main() {
 	cfg, err := config.Load()
 	if err != nil {
@@ -76,6 +84,8 @@ func main() {
 			"database": "ok",
 		})
 	})
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	api := router.Group("/api/v1")
 	subscriptionHandler.RegisterRoutes(api)
