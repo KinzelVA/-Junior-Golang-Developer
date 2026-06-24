@@ -1,0 +1,18 @@
+@'
+.env
+*.env
+!.env.example
+
+bin/
+tmp/
+dist/
+
+*.exe
+*.test
+coverage.out
+
+.idea/
+.vscode/
+
+.DS_Store
+'@ | Set-Content -Encoding UTF8 ".gitignore"
