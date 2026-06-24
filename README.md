@@ -231,13 +231,13 @@ curl http://localhost:8080/health
 
 ## Структура проекта
 
-cmd/app              точка входа приложения
-internal/config      загрузка конфигурации
-internal/db          подключение к PostgreSQL
-internal/handler     HTTP-обработчики
-internal/model       модели, DTO и работа с датами
-internal/repository  SQL-запросы
-internal/service     бизнес-логика
-internal/logger      настройка логирования
-migrations           SQL-миграции
-docs                 Swagger-документация
+* `cmd/app` — точка входа приложения
+* `internal/config` — загрузка конфигурации
+* `internal/db` — подключение к PostgreSQL
+* `internal/handler` — HTTP-обработчики
+* `internal/model` — модели, DTO и работа с датами
+* `internal/repository` — SQL-запросы к базе данных
+* `internal/service` — бизнес-логика
+* `internal/logger` — настройка логирования
+* `migrations` — SQL-миграции
+* `docs` — Swagger-документация
